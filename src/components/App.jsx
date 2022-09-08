@@ -1,17 +1,22 @@
 import React, { Component } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { TextButton, SearchBar } from 'components';
+import { SearchBar, ImageGallery } from 'components';
 
 export class App extends Component {
-  handleFormSubmit = query => {
-    console.log(query);
+  state = {
+    query:'',
+  }
+  handleFormSubmit = newQuery => {
+    this.setState({
+      query: newQuery,
+    })
   };
   render() {
     return (
-      <div>
+      <div className='app'>
         <SearchBar onFormSubmit={this.handleFormSubmit} />
-
+        <ImageGallery query={this.state.query} />
         <ToastContainer
           position="top-right"
           theme="colored"

@@ -17,6 +17,7 @@ export class SearchBar extends Component {
 
     if (!this.state.query.trim()) {    
       toast.warning("Enter your query please!");
+      return;
     }
       
     this.props.onFormSubmit(this.state.query);
@@ -42,4 +43,7 @@ export class SearchBar extends Component {
       </header>
     );
   }
+}
+SearchBar.propTypes = {
+    onFormSubmit: PropTypes.func.isRequired,
 }
