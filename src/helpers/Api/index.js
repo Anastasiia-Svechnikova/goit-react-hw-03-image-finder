@@ -3,10 +3,15 @@ const QUERYURL =
   'https://pixabay.com/api/?key=29314851-8b512a5abc572021537d02a85&q=';
 
 export const fetchImagesByQuery = async query => {
+     try{ const result = await axios.get(`${QUERYURL}${query}`);
 
-    const result = await axios.get(`${QUERYURL}${query}`);
-
-      return result.data.hits;
+         return result.data.hits;
+         
+     }
+     catch (error) {
+         throw new Error(error);
+    }
+   
 
 };
 
