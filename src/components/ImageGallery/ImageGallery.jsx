@@ -4,44 +4,66 @@ import React, { Component } from 'react';
 import s from './ImageGallery.module.css';
 import axios from 'axios';
 import { ImageGalleryItem, Loader, TextButton } from 'components';
+import { fetchImagesByQuery, fetchImagesByPage } from 'helpers/Api';
 
 export class ImageGallery extends Component {
-  static URL =
-    'https://pixabay.com/api/?key=29314851-8b512a5abc572021537d02a85&q=';
+ 
   state = {
     status: 'idle',
-      images: [],
+    images: [],
+    nextImages: [],
     page: 1,
   };
 
-  async componentDidUpdate(prevProps, prevState) {
-    if (prevProps.query !== this.props.query) {
-        this.setState({ status: 'pending' });
+   async componentDidUpdate(prevProps, prevState) {
+     if (prevProps.query !== this.props.query) {
+       this.setState({ page: 1 });
+
+       this.setState({ status: 'pending' });
+
       try {
-        const result = await axios.get(
-          `${ImageGallery.URL}${this.props.query}`
-        );
-        if (!result.data.hits.length) {
-          this.setState({ status: 'rejected' });
+        const res = await fetchImagesByQuery(this.props.query)
+        if (!res.length) {
+          this.setState({ status: 'not found' });
           return;
         }
         this.setState({
+          images: res,
           status: 'resolved',
-          images: result.data.hits,
-        });
+        })
+
       } catch {
-        this.setState({ status: 'rejected' });
+        this.setState({ status: 'rejected' })
       }
-    }
+     }
+     else if(prevState.page !== this.state.page) {
+       this.setState({ status: 'loading' });
+       try {
+         const res = await fetchImagesByPage(this.props.query, this.state.page)
+         console.log(res)
+        if (!res.length) {
+          this.setState({ status: 'not found' });
+          return;
+        }
+         this.setState(prevState => {
+           return{nextImages: res, status: 'resolved'}
+         })
+
+      } catch {
+        this.setState({ status: 'rejected' })
+      }
+     }
   }
-    // handleLoadMore = () => {
-    //     this.setState
-    // }
+    handleLoadMore = () => {
+      this.setState(prevState => {
+        console.log(this.state.page)
+        return{page: prevState.page += 1}
+      })
+    }
+  
   render() {
     const { status, images } = this.state;
-      if (status === 'pending') {   
-      return <Loader/>;
-    }
+      
     if (status === 'resolved') {
       return (
         <>
@@ -50,11 +72,14 @@ export class ImageGallery extends Component {
               <ImageGalleryItem key={id} tags={tags} image={webformatURL} />
             ))}
           </ul>
-          <TextButton />
+          < TextButton onClick={this.handleLoadMore} />
         </>
       );
     }
-    if (status === 'rejected') {
+    if (status === 'pending') {   
+      return <Loader/>;
+    }
+    if (status === 'not found') {
       return (
         <p>
           Oops, seems like there is nothing found... Try another search, please!
