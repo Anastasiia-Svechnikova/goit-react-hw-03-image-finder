@@ -1,6 +1,6 @@
-export { TextButton } from './Buttons/TextButton/TextButton';
-export { IconButton } from './Buttons/IconButton/IconButton';
-export { SearchBar } from './SearchBar/SearchBar';
-export { ImageGalleryItem } from './ImageGalleryItem/ImageGalleryItem';
-export { ImageGallery } from './ImageGallery/ImageGallery';
-export { Loader } from './Loader/Loader';
+export { TextButton } from './Buttons/TextButton/TextButton.jsx';
+export { IconButton } from './Buttons/IconButton/IconButton.jsx';
+export { SearchBar } from './SearchBar/SearchBar.jsx';
+export { ImageGalleryItem } from './ImageGalleryItem/ImageGalleryItem.jsx';
+export { ImageGallery } from './ImageGallery/ImageGallery.jsx';
+export { Loader } from './Loader/Loader.jsx';
