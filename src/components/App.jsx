@@ -6,20 +6,19 @@ import { SearchBar, ImageGallery } from 'components';
 export class App extends Component {
   state = {
     query: '',
-    page: 1,
   };
   handleFormSubmit = newQuery => {
     this.setState({
       query: newQuery,
-      page: 1,
+
     });
   };
   render() {
-    const { page, query } = this.state;
+    const { query} = this.state;
     return (
       <div className="app">
         <SearchBar onFormSubmit={this.handleFormSubmit} />
-        <ImageGallery query={query} page={page} />
+        <ImageGallery query={query}  />
         <ToastContainer
           position="top-right"
           theme="colored"

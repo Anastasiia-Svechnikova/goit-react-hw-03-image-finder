@@ -2,90 +2,102 @@ import PropTypes from 'prop-types';
 
 import React, { Component } from 'react';
 import s from './ImageGallery.module.css';
-// import axios from 'axios';
 import { ImageGalleryItem, Loader, TextButton } from 'components';
-import { fetchImagesByQuery, fetchImagesByPage } from 'helpers/Api';
+import { fetchImages } from 'helpers';
+
 
 export class ImageGallery extends Component {
- 
   state = {
     status: 'idle',
     images: [],
-
+    page: 1,
+    totalPages: 0, 
+    perPage: 20,
+    isLoadBtnShown: true,
   };
 
-   async componentDidUpdate(prevProps, prevState) {
-     if (prevProps.query !== this.props.query ) {
-       this.setState({ page: 1 });
+  async componentDidUpdate(prevProps, prevState) {
+    const { page, perPage } = this.state
 
-       this.setState({ status: 'pending' });
-
+    if (
+      prevProps.query !== this.props.query ||
+      prevState.page !== this.state.page
+    ) {    
+      this.setState({ status: 'pending' });
+      
       try {
-        const res = await fetchImagesByQuery(this.props.query)
-        if (!res.length) {
-          this.setState({ status: 'not found' , images: []});
-          return;
-        }
-        this.setState({
-          images: res,
-          status: 'resolved',
-        })
+        let res = [];
 
-      } catch {
-        this.setState({ status: 'rejected' })
-      }
-     }
-     else if(prevState.page !== this.state.page) {
-       this.setState({ status: 'loading' });
-       try {
-         const res = await fetchImagesByPage(this.props.query, this.state.page)
-         console.log(res)
-        if (!res.length) {
+        if (prevProps.query !== this.props.query) {         
+          this.setState({ images: [], isLoadBtnShown:true})
+          res = await fetchImages(this.props.query, 1);
+
+        } else if (page !== 1) {
+          res = await fetchImages(this.props.query, page);
+        } 
+
+        if (!res.hits.length) {
           this.setState({ status: 'not found', images: [] });
           return;
         }
-         this.setState(prevState => {
-           return{nextImages: res, status: 'resolved'}
-         })
 
-      } catch {
-        this.setState({ status: 'rejected' })
+        this.setState(prevState => {
+          return {
+            status: 'resolved',
+            images: [...prevState.images, ...res.hits],
+            totalPages: res.totalHits,
+            isLoadBtnShown: (res.totalHits > perPage && ((res.totalHits / page) > perPage))
+          };
+        });
+
       }
-     }
-  }
-    handleLoadMore = () => {
-      this.setState(prevState => {
-        console.log(this.state.page)
-        return{page: prevState.page += 1}
-      })
+      catch {
+        console.log('fuck')
+        this.setState({ status: 'rejected' });
+      }
     }
-  
+  }
+
+
+  handleLoadMore = () => {
+    if (this.state.images.length === 20) {
+      this.setState({page: 2});
+      return;
+    }
+    this.setState(prevState => {
+      return { page: (prevState.page += 1) };
+    });
+  };
+
   render() {
-    const { status, images } = this.state;
-    
-    
-      return (
-        <>
-         
-          {status === 'not found' && <p>
-          Oops, seems like there is nothing found... Try another search, please!
-        </p>}
-          <ul className={s.gallery}>
-            { images.map(({ id, tags, webformatURL, largeImageURL }) => (
-              <ImageGalleryItem key={id} tags={tags} image={webformatURL} largeImage={largeImageURL} onClick={this.handleOpenModal } />
-            ))}
-          </ul>
-          {status === 'pending' && <Loader />}
-          {status === 'resolved' && < TextButton onClick={this.handleLoadMore} />}
-          
-        </>
-      );
-      
-    
+    const { status, images, isLoadBtnShown } = this.state;
+
+    return (
+      <>
+        {status === 'not found' && (
+          <p>
+            Oops, seems like there is nothing found... Try another search,
+            please!
+          </p>
+        )}
+        <ul className={s.gallery}>
+          {images.map(({ id, tags, webformatURL, largeImageURL }) => (
+            <ImageGalleryItem
+              key={id}
+              tags={tags}
+              image={webformatURL}
+              largeImage={largeImageURL}
+              onClick={this.handleOpenModal}
+            />
+          ))}
+        </ul>
+        {status === 'pending' && <Loader />}
+        {(status === 'resolved' && isLoadBtnShown) && <TextButton onClick={this.handleLoadMore} />}
+      </>
+    );
   }
 }
 
 ImageGallery.propTypes = {
   query: PropTypes.string.isRequired,
-  page: PropTypes.number.isRequired
 };
