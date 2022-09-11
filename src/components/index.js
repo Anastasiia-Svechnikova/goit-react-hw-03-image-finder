@@ -4,3 +4,4 @@ export { SearchBar } from './SearchBar/SearchBar.jsx';
 export { ImageGalleryItem } from './ImageGalleryItem/ImageGalleryItem.jsx';
 export { ImageGallery } from './ImageGallery/ImageGallery.jsx';
 export { Loader } from './Loader/Loader.jsx';
+export { Modal } from './Modal/Modal.jsx';

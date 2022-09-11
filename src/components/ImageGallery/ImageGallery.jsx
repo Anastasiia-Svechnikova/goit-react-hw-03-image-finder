@@ -1,10 +1,8 @@
 import PropTypes from 'prop-types';
-
 import React, { Component } from 'react';
 import s from './ImageGallery.module.css';
 import { ImageGalleryItem, Loader, TextButton } from 'components';
 import { fetchImages } from 'helpers';
-
 
 export class ImageGallery extends Component {
   state = {
@@ -40,7 +38,7 @@ export class ImageGallery extends Component {
           this.setState({ status: 'not found', images: [] });
           return;
         }
-
+console.log(res)
         this.setState(prevState => {
           return {
             status: 'resolved',
@@ -69,6 +67,8 @@ export class ImageGallery extends Component {
     });
   };
 
+ 
+
   render() {
     const { status, images, isLoadBtnShown } = this.state;
 
@@ -81,18 +81,19 @@ export class ImageGallery extends Component {
           </p>
         )}
         <ul className={s.gallery}>
-          {images.map(({ id, tags, webformatURL, largeImageURL }) => (
+          {images.map(({ id, tags, webformatURL, largeImageURL, imageWidth, webformatWidth }) => (
             <ImageGalleryItem
               key={id}
               tags={tags}
               image={webformatURL}
               largeImage={largeImageURL}
-              onClick={this.handleOpenModal}
+              imageWidth={imageWidth}
+              webformatWidth={webformatWidth}
             />
           ))}
         </ul>
         {status === 'pending' && <Loader />}
-        {(status === 'resolved' && isLoadBtnShown) && <TextButton onClick={this.handleLoadMore} />}
+        {(status === 'resolved' && isLoadBtnShown) && <TextButton onClick={this.handleLoadMore} />}         
       </>
     );
   }
