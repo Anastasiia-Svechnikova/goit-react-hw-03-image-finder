@@ -4,9 +4,7 @@ const QUERYURL =
 
 export const fetchImages = async (query, page) => {
      try{ const result = await axios.get(`${QUERYURL}&q=${query}&page=${page}`);
-console.log(result)
-         return result.data;
-         
+         return result.data;      
      }
      catch (error) {
          throw new Error(error);

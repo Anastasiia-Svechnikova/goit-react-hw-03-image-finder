@@ -4,53 +4,53 @@ import s from './ImageGallery.module.css';
 import { ImageGalleryItem, Loader, TextButton } from 'components';
 import { fetchImages } from 'helpers';
 
+const IMAGES_PER_PAGE = 20;
 export class ImageGallery extends Component {
   state = {
     status: 'idle',
     images: [],
     page: 1,
     totalPages: 0, 
-    perPage: 20,
     isLoadBtnShown: true,
   };
 
   async componentDidUpdate(prevProps, prevState) {
-    const { page, perPage } = this.state
+    const { page } = this.state;
+    const { query } = this.props;
 
     if (
-      prevProps.query !== this.props.query ||
-      prevState.page !== this.state.page
+      prevProps.query !== query ||
+      prevState.page !== page
     ) {    
       this.setState({ status: 'pending' });
       
       try {
-        let res = [];
+        let res = null;
 
-        if (prevProps.query !== this.props.query) {         
+        if (prevProps.query !== query) {         
           this.setState({ images: [], isLoadBtnShown:true})
-          res = await fetchImages(this.props.query, 1);
+          res = await fetchImages(query, 1);
 
         } else if (page !== 1) {
-          res = await fetchImages(this.props.query, page);
+          res = await fetchImages(query, page);
         } 
 
         if (!res.hits.length) {
           this.setState({ status: 'not found', images: [] });
           return;
         }
-console.log(res)
+
         this.setState(prevState => {
           return {
             status: 'resolved',
             images: [...prevState.images, ...res.hits],
             totalPages: res.totalHits,
-            isLoadBtnShown: (res.totalHits > perPage && ((res.totalHits / page) > perPage))
+            isLoadBtnShown: (res.totalHits > IMAGES_PER_PAGE && ((res.totalHits / page) > IMAGES_PER_PAGE))
           };
         });
 
       }
       catch {
-        console.log('fuck')
         this.setState({ status: 'rejected' });
       }
     }
@@ -58,7 +58,7 @@ console.log(res)
 
 
   handleLoadMore = () => {
-    if (this.state.images.length === 20) {
+    if (this.state.images.length === IMAGES_PER_PAGE) {
       this.setState({page: 2});
       return;
     }
@@ -81,14 +81,12 @@ console.log(res)
           </p>
         )}
         <ul className={s.gallery}>
-          {images.map(({ id, tags, webformatURL, largeImageURL, imageWidth, webformatWidth }) => (
+          {images.map(({ id, tags, webformatURL, largeImageURL}) => (
             <ImageGalleryItem
               key={id}
               tags={tags}
               image={webformatURL}
               largeImage={largeImageURL}
-              imageWidth={imageWidth}
-              webformatWidth={webformatWidth}
             />
           ))}
         </ul>

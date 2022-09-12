@@ -19,7 +19,7 @@ export class ImageGalleryItem extends Component {
   };
 
   render() {
-    const { image, tags, largeImage, imageWidth, webformatWidth } = this.props;
+    const { image, tags, largeImage } = this.props;
     const { showModal } = this.state;
     return (
       <>
@@ -28,12 +28,11 @@ export class ImageGalleryItem extends Component {
             className={s.image}
             src={image}
             alt={tags}
-            width={webformatWidth}
           />
         </li>
         {showModal && (
           <Modal onClose={this.handleCloseModal}>
-            <img src={largeImage} alt={tags} width={imageWidth} />
+            <img src={largeImage} alt={tags}/>
           </Modal>
         )}
       </>
@@ -45,6 +44,4 @@ ImageGalleryItem.propTypes = {
   image: PropTypes.string.isRequired,
   largeImage: PropTypes.string.isRequired,
   tags: PropTypes.string,
-  imageWidth: PropTypes.number.isRequired,
-  webformatWidth: PropTypes.number.isRequired,
 };
