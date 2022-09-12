@@ -17,23 +17,16 @@ export class ImageGallery extends Component {
   async componentDidUpdate(prevProps, prevState) {
     const { page } = this.state;
     const { query } = this.props;
-
+    const isNewQuery = prevProps.query !== query;
     if (
-      prevProps.query !== query ||
-      prevState.page !== page
+      isNewQuery ||
+      (prevState.page !== page && page !== 1)
     ) {    
       this.setState({ status: 'pending' });
       
       try {
-        let res = null;
-
-        if (prevProps.query !== query) {         
-          this.setState({ images: [], isLoadBtnShown:true})
-          res = await fetchImages(query, 1);
-
-        } else if (page !== 1) {
-          res = await fetchImages(query, page);
-        } 
+        const currentPage = isNewQuery ? 1 : page;
+        const res = await fetchImages(query, currentPage);
 
         if (!res.hits.length) {
           this.setState({ status: 'not found', images: [] });
@@ -41,10 +34,12 @@ export class ImageGallery extends Component {
         }
 
         this.setState(prevState => {
+          const images = isNewQuery ? []: prevState.images
           return {
             status: 'resolved',
-            images: [...prevState.images, ...res.hits],
+            images: [...images, ...res.hits],
             totalPages: res.totalHits,
+            page: currentPage,
             isLoadBtnShown: (res.totalHits > IMAGES_PER_PAGE && ((res.totalHits / page) > IMAGES_PER_PAGE))
           };
         });
@@ -58,10 +53,6 @@ export class ImageGallery extends Component {
 
 
   handleLoadMore = () => {
-    if (this.state.images.length === IMAGES_PER_PAGE) {
-      this.setState({page: 2});
-      return;
-    }
     this.setState(prevState => {
       return { page: (prevState.page += 1) };
     });
