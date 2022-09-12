@@ -54,7 +54,7 @@ export class ImageGallery extends Component {
 
   handleLoadMore = () => {
     this.setState(prevState => {
-      return { page: (prevState.page += 1) };
+      return { page: (prevState.page + 1) };
     });
   };
 
